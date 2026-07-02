@@ -1,0 +1,146 @@
+// src/data/mockProperties.ts
+// Placeholder listings for the Home screen UI, ahead of Day 3's real CRUD +
+// MSW /properties endpoints. Images are stable picsum.photos IDs (no API key,
+// consistent per-property so the same listing always shows the same photo).
+
+import { Property, Category } from '@/types/property.types';
+
+export const categories: Category[] = [
+  { id: 'c1', label: 'House', icon: 'home-outline', propertyType: 'House', count: 1249 },
+  { id: 'c2', label: 'Flat', icon: 'office-building-outline', propertyType: 'Flat', count: 2236 },
+  { id: 'c3', label: 'Room', icon: 'bed-outline', propertyType: 'Room', count: 640 },
+  { id: 'c4', label: 'Office', icon: 'briefcase-outline', propertyType: 'Office', count: 512 },
+  { id: 'c5', label: 'Shop', icon: 'storefront-outline', propertyType: 'Shop', count: 233 },
+  { id: 'c6', label: 'Land', icon: 'terrain', propertyType: 'Land', count: 180 },
+];
+
+export const featuredProperties: Property[] = [
+  {
+    id: 'p1',
+    title: 'Modern House in Bashundhara',
+    description: 'A bright, freshly renovated house close to the R/A entrance with dedicated parking.',
+    price: 35000,
+    location: 'Bashundhara R/A',
+    city: 'Dhaka',
+    bedrooms: 4,
+    bathrooms: 3,
+    area: 2200,
+    propertyType: 'House',
+    ownerName: 'Rahim Chowdhury',
+    contactNumber: '+880 1700 000001',
+    image: 'https://picsum.photos/id/1029/800/600',
+    status: 'Available',
+    verified: true,
+  },
+  {
+    id: 'p2',
+    title: 'Beautiful Duplex in Mirpur',
+    description: 'Family-friendly duplex with a private garden and rooftop access.',
+    price: 30000,
+    location: 'Mirpur 10',
+    city: 'Dhaka',
+    bedrooms: 3,
+    bathrooms: 2,
+    area: 1900,
+    propertyType: 'House',
+    ownerName: 'Nasrin Akter',
+    contactNumber: '+880 1700 000002',
+    image: 'https://picsum.photos/id/1040/800/600',
+    status: 'Available',
+    verified: true,
+  },
+  {
+    id: 'p3',
+    title: 'Luxury Flat in Gulshan 2',
+    description: 'High-rise flat with skyline views, gym access, and 24/7 security.',
+    price: 55000,
+    location: 'Gulshan 2',
+    city: 'Dhaka',
+    bedrooms: 3,
+    bathrooms: 3,
+    area: 1800,
+    propertyType: 'Flat',
+    ownerName: 'Kamal Hasan',
+    contactNumber: '+880 1700 000003',
+    image: 'https://picsum.photos/id/1044/800/600',
+    status: 'Available',
+    verified: true,
+  },
+  {
+    id: 'p4',
+    title: 'Cozy 2-Bed Flat in Banani',
+    description: 'Compact, well-lit flat perfect for a small family or young professionals.',
+    price: 38000,
+    location: 'Banani',
+    city: 'Dhaka',
+    bedrooms: 2,
+    bathrooms: 2,
+    area: 1050,
+    propertyType: 'Flat',
+    ownerName: 'Farzana Islam',
+    contactNumber: '+880 1700 000004',
+    image: 'https://picsum.photos/id/1048/800/600',
+    status: 'Available',
+    verified: false,
+  },
+];
+
+export const trustStats = [
+  { id: 's1', value: '12,000+', label: 'Listings' },
+  { id: 's2', value: '45,000+', label: 'Happy Clients' },
+  { id: 's3', value: '30+', label: 'Cities' },
+];
+
+export const whyChoose = [
+  {
+    id: 'w1',
+    icon: 'shield-check-outline',
+    title: 'Verified Listings',
+    description: 'Every featured property is reviewed before it goes live.',
+  },
+  {
+    id: 'w2',
+    icon: 'account-tie-outline',
+    title: 'Trusted Agents',
+    description: 'Work directly with agents verified across every city.',
+  },
+  {
+    id: 'w3',
+    icon: 'magnify',
+    title: 'Smart Search',
+    description: 'Filters that find homes that actually match your budget.',
+  },
+  {
+    id: 'w4',
+    icon: 'lock-check-outline',
+    title: 'Secure Process',
+    description: 'Message and negotiate with owners safely, in one place.',
+  },
+];
+
+export const howItWorks = [
+  {
+    id: 'h1',
+    step: 1,
+    title: 'Search Property',
+    description: 'Filter by location, type, and budget to find what matches.',
+  },
+  {
+    id: 'h2',
+    step: 2,
+    title: 'Choose Property',
+    description: 'Compare verified listings with real photos and prices.',
+  },
+  {
+    id: 'h3',
+    step: 3,
+    title: 'Contact Owner',
+    description: 'Reach the owner directly by phone or through the app.',
+  },
+  {
+    id: 'h4',
+    step: 4,
+    title: 'Make It Yours',
+    description: 'Schedule a visit, finalize the deal, and move in.',
+  },
+];

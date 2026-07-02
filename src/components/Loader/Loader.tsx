@@ -1,0 +1,47 @@
+// src/components/Loader/Loader.tsx
+
+import React from 'react';
+import { View, StyleSheet, Modal } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native-paper';
+import { colors } from '@/theme/colors';
+
+interface LoaderProps {
+  visible: boolean;
+  label?: string;
+}
+
+export default function Loader({ visible, label = 'Please wait...' }: LoaderProps) {
+  if (!visible) return null;
+
+  return (
+    <Modal transparent animationType="fade" visible={visible}>
+      <View style={styles.overlay}>
+        <View style={styles.card}>
+          <ActivityIndicator animating size="large" color={colors.primary} />
+          <Text style={styles.label}>{label}</Text>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    backgroundColor: colors.surface,
+    paddingVertical: 24,
+    paddingHorizontal: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    gap: 12,
+  },
+  label: {
+    color: colors.text,
+    marginTop: 8,
+  },
+});
