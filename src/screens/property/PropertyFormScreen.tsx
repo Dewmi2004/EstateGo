@@ -49,6 +49,7 @@ const emptyForm: PropertyFormInput = {
   propertyType: 'House',
   ownerName: '',
   contactNumber: '',
+  ownerEmail: '',
   image: '',
   status: 'Available',
 };
@@ -60,6 +61,7 @@ interface FormErrors {
   location?: string;
   ownerName?: string;
   contactNumber?: string;
+  ownerEmail?: string;
 }
 
 export default function PropertyFormScreen({ route, navigation }: AddProps | EditProps) {
@@ -78,7 +80,7 @@ export default function PropertyFormScreen({ route, navigation }: AddProps | Edi
       dispatch(fetchPropertyById(propertyId));
     } else {
       // Pre-fill owner details from the logged-in user for a new listing.
-      setForm((prev) => ({ ...prev, ownerName: user?.name ?? '' }));
+      setForm((prev) => ({ ...prev, ownerName: user?.name ?? '', ownerEmail: user?.email ?? '' }));
     }
     return () => {
       dispatch(clearSelected());
@@ -104,6 +106,8 @@ export default function PropertyFormScreen({ route, navigation }: AddProps | Edi
     if (!form.location.trim()) next.location = 'Location is required';
     if (!form.ownerName.trim()) next.ownerName = 'Owner name is required';
     if (!form.contactNumber.trim()) next.contactNumber = 'Contact number is required';
+    if (!form.ownerEmail.trim()) next.ownerEmail = 'Contact email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.ownerEmail)) next.ownerEmail = 'Enter a valid email address';
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -208,6 +212,13 @@ export default function PropertyFormScreen({ route, navigation }: AddProps | Edi
           onChangeText={(v) => update('contactNumber', v)}
           keyboardType="phone-pad"
           error={errors.contactNumber}
+        />
+        <Input
+          label="Contact Email"
+          value={form.ownerEmail}
+          onChangeText={(v) => update('ownerEmail', v)}
+          keyboardType="email-address"
+          error={errors.ownerEmail}
         />
 
         <Button

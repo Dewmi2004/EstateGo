@@ -66,6 +66,20 @@ export default function PropertyDetailsScreen({ route, navigation }: Props) {
     });
   };
 
+  const handleEmail = () => {
+    const subject = encodeURIComponent(`Inquiry: ${property.title}`);
+    Linking.openURL(`mailto:${property.ownerEmail}?subject=${subject}`).catch(() => {
+      Alert.alert('Unable to open mail app');
+    });
+  };
+
+  const handleDirections = () => {
+    const query = encodeURIComponent(`${property.location}, ${property.city}`);
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`).catch(() => {
+      Alert.alert('Unable to open Google Maps');
+    });
+  };
+
   return (
     <View style={styles.screen}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -133,6 +147,20 @@ export default function PropertyDetailsScreen({ route, navigation }: Props) {
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.description}>{property.description}</Text>
 
+          <Text style={styles.sectionTitle}>Location</Text>
+          <TouchableOpacity style={styles.locationCard} onPress={handleDirections} activeOpacity={0.85}>
+            <View style={styles.locationIconCircle}>
+              <Icon source="map-marker-radius-outline" size={20} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.ownerName}>
+                {property.location}, {property.city}
+              </Text>
+              <Text style={styles.ownerContact}>Tap to get directions on Google Maps</Text>
+            </View>
+            <Icon source="chevron-right" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+
           <Text style={styles.sectionTitle}>Owner</Text>
           <View style={styles.ownerRow}>
             <View style={styles.ownerAvatar}>
@@ -142,10 +170,23 @@ export default function PropertyDetailsScreen({ route, navigation }: Props) {
               <Text style={styles.ownerName}>{property.ownerName}</Text>
               <Text style={styles.ownerContact}>{property.contactNumber}</Text>
             </View>
-            <TouchableOpacity style={styles.callButton} onPress={handleCall}>
-              <Icon source="phone" size={18} color={colors.textInverse} />
-            </TouchableOpacity>
+            {!isOwner && (
+              <View style={styles.ownerActions}>
+                <TouchableOpacity style={styles.iconButton} onPress={handleEmail}>
+                  <Icon source="email-outline" size={18} color={colors.textInverse} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={handleCall}>
+                  <Icon source="phone" size={18} color={colors.textInverse} />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
+
+          {!isOwner && (
+            <Text style={styles.viewerNote}>
+              You're viewing this listing as a visitor — only the owner can edit or remove it.
+            </Text>
+          )}
         </View>
       </ScrollView>
 
@@ -168,7 +209,15 @@ export default function PropertyDetailsScreen({ route, navigation }: Props) {
             />
           </>
         ) : (
-          <Button label="Contact Owner" mode="contained" onPress={handleCall} style={styles.footerButton} />
+          <>
+            <Button
+              label="Directions"
+              mode="outlined"
+              onPress={handleDirections}
+              style={styles.footerButton}
+            />
+            <Button label="Call Owner" mode="contained" onPress={handleCall} style={styles.footerButton} />
+          </>
         )}
       </View>
     </View>
@@ -343,13 +392,43 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: 2,
   },
-  callButton: {
+  locationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 12,
+    marginBottom: 20,
+  },
+  locationIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ownerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  iconButton: {
     width: 38,
     height: 38,
     borderRadius: 12,
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  viewerNote: {
+    fontFamily: fonts.body,
+    fontSize: moderateScale(type.micro),
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: 14,
   },
   footer: {
     position: 'absolute',

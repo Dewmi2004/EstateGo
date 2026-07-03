@@ -20,6 +20,7 @@ export interface Property {
   propertyType: PropertyType;
   ownerName: string;
   contactNumber: string;
+  ownerEmail: string;
   image: string;
   status: PropertyStatus;
   verified: boolean;
@@ -39,6 +40,7 @@ export interface PropertyFormInput {
   propertyType: PropertyType;
   ownerName: string;
   contactNumber: string;
+  ownerEmail: string;
   image: string;
   status: PropertyStatus;
 }
