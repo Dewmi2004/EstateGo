@@ -6,6 +6,8 @@
 // moderateScale() result — fonts, padding, icons all render far too large.
 // EFFECTIVE_WIDTH/HEIGHT cap what's used for the scale math on web so the
 // UI renders at native-app proportions instead of desktop-website scale.
+// (Paired with the phone-frame wrapper in App.tsx that visually contains
+// the app on web.)
 
 import { Dimensions, PixelRatio, Platform } from 'react-native';
 

@@ -24,6 +24,8 @@ export const usersDb = {
   findByEmail: (email: string): StoredUser | undefined =>
     seedUsers.find((u) => u.email.toLowerCase() === email.toLowerCase()),
 
+  findById: (id: string): StoredUser | undefined => seedUsers.find((u) => u.id === id),
+
   create: (name: string, email: string, password: string): StoredUser => {
     const newUser: StoredUser = {
       id: `u_${Date.now()}`,
@@ -34,6 +36,13 @@ export const usersDb = {
     };
     seedUsers.push(newUser);
     return newUser;
+  },
+
+  update: (id: string, patch: Partial<Pick<StoredUser, 'name' | 'email'>>): StoredUser | undefined => {
+    const user = seedUsers.find((u) => u.id === id);
+    if (!user) return undefined;
+    Object.assign(user, patch);
+    return user;
   },
 
   toPublicUser: (user: StoredUser): User => ({

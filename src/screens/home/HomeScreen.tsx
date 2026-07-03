@@ -1,34 +1,48 @@
 // src/screens/home/HomeScreen.tsx
-// Redesigned home feed: hero + search, trust strip, categories, featured
-// listings, why-EstateGo grid, list-your-property CTA, how-it-works steps.
-// All data is mocked (src/data/mockProperties.ts) until Day 3 wires up real
-// property CRUD against the MSW/web mock API.
+// Home feed: hero + search, trust strip, categories, featured listings
+// (now real CRUD data via propertySlice), why-EstateGo grid, list-your-
+// property CTA, how-it-works steps.
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Icon } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale, maxContentWidth } from '@/utils/responsive';
-import { useAppSelector } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { fetchProperties } from '@/redux/property/propertySlice';
+import { fetchFavorites, toggleFavorite } from '@/redux/favorite/favoriteSlice';
 import SearchBar from '@/components/SearchBar/SearchBar';
 import StatBadge from '@/components/StatBadge/StatBadge';
 import CategoryChip from '@/components/CategoryChip/CategoryChip';
 import PropertyCard from '@/components/PropertyCard/PropertyCard';
 import SectionHeader from '@/components/SectionHeader/SectionHeader';
 import CTABanner from '@/components/CTABanner/CTABanner';
-import {
-  categories,
-  featuredProperties,
-  trustStats,
-  whyChoose,
-  howItWorks,
-} from '@/data/mockProperties';
+import { categories, trustStats, whyChoose, howItWorks } from '@/data/mockProperties';
 
 export default function HomeScreen() {
+  // Loosely typed: Home lives in the tab navigator and needs to reach into
+  // the nested Properties stack, which makes the composite navigation type
+  // unwieldy for a screen this simple — see FavoritesScreen for the same
+  // pattern.
+  const navigation = useNavigation<any>();
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { items: properties } = useAppSelector((state) => state.property);
+  const { ids: favoriteIds } = useAppSelector((state) => state.favorite);
   const firstName = user?.name?.split(' ')[0] ?? 'there';
+
+  useEffect(() => {
+    dispatch(fetchProperties());
+    dispatch(fetchFavorites());
+  }, [dispatch]);
+
+  const goToProperties = () => navigation.navigate('PropertiesTab', { screen: 'PropertyList' });
+  const goToPropertyDetails = (propertyId: string) =>
+    navigation.navigate('PropertiesTab', { screen: 'PropertyDetails', params: { propertyId } });
+  const goToAddProperty = () => navigation.navigate('PropertiesTab', { screen: 'AddProperty' });
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
@@ -49,7 +63,7 @@ export default function HomeScreen() {
             </View>
           </View>
           <View style={styles.heroDivider} />
-          <SearchBar />
+          <SearchBar onPress={goToProperties} />
         </View>
 
         {/* Trust strip — overlaps the hero bottom edge */}
@@ -66,20 +80,27 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.categoryList}
-            renderItem={({ item }) => <CategoryChip category={item} />}
+            renderItem={({ item }) => <CategoryChip category={item} onPress={goToProperties} />}
           />
         </View>
 
         {/* Featured properties */}
         <View style={styles.section}>
-          <SectionHeader eyebrow="Hand-picked" title="Featured properties" actionLabel="View all" />
+          <SectionHeader eyebrow="Hand-picked" title="Featured properties" actionLabel="View all" onActionPress={goToProperties} />
           <FlatList
-            data={featuredProperties}
+            data={properties.slice(0, 6)}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.propertyList}
-            renderItem={({ item }) => <PropertyCard property={item} />}
+            renderItem={({ item }) => (
+              <PropertyCard
+                property={item}
+                isFavorite={favoriteIds.includes(item.id)}
+                onPress={() => goToPropertyDetails(item.id)}
+                onToggleFavorite={() => dispatch(toggleFavorite(item.id))}
+              />
+            )}
           />
         </View>
 
@@ -105,6 +126,7 @@ export default function HomeScreen() {
             title="Have a property to list?"
             description="Reach thousands of verified renters and buyers across Bangladesh in minutes."
             buttonLabel="Post Your Property"
+            onPress={goToAddProperty}
           />
         </View>
 

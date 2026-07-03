@@ -15,11 +15,11 @@ export const fonts = {
 // Base type scale (pass through moderateScale() at the call site for
 // tablet-aware sizing — kept as raw numbers here so it's one source of truth).
 export const type = {
-  display: 30,   // hero headline
-  h1: 22,        // screen title
-  h2: 18,        // section title
-  h3: 15,        // card title
-  body: 14,       // default copy
-  caption: 12,    // meta text, labels
-  micro: 11,       // badges, tags
+  display: 26,   // hero headline
+  h1: 20,        // screen title
+  h2: 17,        // section title
+  h3: 14,        // card title
+  body: 13,       // default copy
+  caption: 11,    // meta text, labels
+  micro: 10,       // badges, tags
 };

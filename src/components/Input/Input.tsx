@@ -12,9 +12,11 @@ interface AppInputProps {
   onChangeText: (text: string) => void;
   error?: string;
   secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'numeric';
+  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad' | 'decimal-pad';
   autoCapitalize?: 'none' | 'sentences' | 'words';
   icon?: string;
+  multiline?: boolean;
+  numberOfLines?: number;
   testID?: string;
 }
 
@@ -27,6 +29,8 @@ export default function Input({
   keyboardType = 'default',
   autoCapitalize = 'none',
   icon,
+  multiline = false,
+  numberOfLines,
   testID,
 }: AppInputProps) {
   const [hideText, setHideText] = useState(secureTextEntry);
@@ -42,9 +46,11 @@ export default function Input({
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         error={!!error}
+        multiline={multiline}
+        numberOfLines={numberOfLines}
         outlineColor={colors.border}
         activeOutlineColor={colors.primary}
-        style={styles.input}
+        style={[styles.input, multiline && styles.multilineInput]}
         left={icon ? <TextInput.Icon icon={icon} /> : undefined}
         right={
           secureTextEntry ? (
@@ -70,6 +76,9 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: colors.surface,
     fontSize: moderateScale(15),
+  },
+  multilineInput: {
+    minHeight: moderateScale(90),
   },
   helper: {
     marginTop: -4,

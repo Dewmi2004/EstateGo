@@ -1,10 +1,12 @@
 // src/services/api/axiosInstance.ts
 
 import axios from 'axios';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { webMockAdapter } from '@/services/msw/webMockAdapter';
 
-// Base URL is irrelevant while MSW intercepts requests, but is kept realistic
-// so switching to a real backend later is a one-line change.
+// Base URL is irrelevant while the mock layer intercepts requests, but is kept
+// realistic so switching to a real backend later is a one-line change.
 const BASE_URL = 'https://api.estategoNumbergo.mock';
 
 export const STORAGE_KEYS = {
@@ -19,6 +21,10 @@ export const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Native (Android/iOS) is intercepted by msw/native (see services/msw/mockServer.native.ts).
+  // Web uses webMockAdapter directly, since msw/browser's bundle doesn't
+  // transform cleanly under Metro's Babel target.
+  adapter: Platform.OS === 'web' ? webMockAdapter : undefined,
 });
 
 // Attach the stored token to every outgoing request automatically.

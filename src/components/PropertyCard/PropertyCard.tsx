@@ -12,14 +12,21 @@ interface PropertyCardProps {
   property: Property;
   onPress?: () => void;
   onToggleFavorite?: () => void;
-  width?: number;
+  isFavorite?: boolean;
+  width?: number | '100%';
 }
 
 function formatPrice(price: number): string {
   return `৳ ${price.toLocaleString()}/mo`;
 }
 
-export default function PropertyCard({ property, onPress, onToggleFavorite, width }: PropertyCardProps) {
+export default function PropertyCard({
+  property,
+  onPress,
+  onToggleFavorite,
+  isFavorite = false,
+  width,
+}: PropertyCardProps) {
   return (
     <TouchableOpacity
       style={[styles.card, width ? { width } : undefined]}
@@ -36,11 +43,17 @@ export default function PropertyCard({ property, onPress, onToggleFavorite, widt
           </View>
         )}
 
+        {property.status !== 'Available' && (
+          <View style={styles.statusBadge}>
+            <Text style={styles.statusText}>{property.status}</Text>
+          </View>
+        )}
+
         <TouchableOpacity style={styles.favoriteButton} onPress={onToggleFavorite} hitSlop={8}>
           <Icon
-            source={property.isFavorite ? 'heart' : 'heart-outline'}
+            source={isFavorite ? 'heart' : 'heart-outline'}
             size={18}
-            color={property.isFavorite ? colors.error : colors.textInverse}
+            color={isFavorite ? colors.error : colors.textInverse}
           />
         </TouchableOpacity>
 
@@ -129,6 +142,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(11, 31, 58, 0.45)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: 44,
+    right: 8,
+    backgroundColor: colors.text,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  statusText: {
+    color: colors.textInverse,
+    fontFamily: fonts.bodySemiBold,
+    fontSize: moderateScale(type.micro - 1),
   },
   priceTag: {
     position: 'absolute',
