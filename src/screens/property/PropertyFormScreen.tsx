@@ -9,8 +9,9 @@ import { Text } from 'react-native-paper';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PropertyStackParamList } from '@/navigation/PropertyNavigator';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { createProperty, updateProperty, fetchPropertyById, clearSelected } from '@/redux/property/propertySlice';
+import { updateProperty, fetchPropertyById, clearSelected } from '@/redux/property/propertySlice';
 import Input from '@/components/Input/Input';
+import ImagePickerField from '@/components/ImagePickerField/ImagePickerField';
 import Button from '@/components/Button/Button';
 import ChipSelector from '@/components/ChipSelector/ChipSelector';
 import Loader from '@/components/Loader/Loader';
@@ -126,10 +127,8 @@ export default function PropertyFormScreen({ route, navigation }: AddProps | Edi
         navigation.goBack();
       }
     } else {
-      const result = await dispatch(createProperty(payload));
-      if (createProperty.fulfilled.match(result)) {
-        navigation.goBack();
-      }
+      // New listings require the LKR 10,000 PayHere fee first — see PaymentScreen.
+      navigation.navigate('Payment', { formInput: payload });
     }
   };
 
@@ -163,7 +162,7 @@ export default function PropertyFormScreen({ route, navigation }: AddProps | Edi
         <View style={styles.row}>
           <View style={styles.rowItem}>
             <Input
-              label="Price (৳/mo)"
+              label="Price (LKR/mo)"
               value={form.price ? String(form.price) : ''}
               onChangeText={(v) => update('price', Number(v.replace(/[^0-9]/g, '')) || 0)}
               keyboardType="numeric"
@@ -197,12 +196,7 @@ export default function PropertyFormScreen({ route, navigation }: AddProps | Edi
             />
           </View>
         </View>
-        <Input
-          label="Image URL (optional)"
-          value={form.image}
-          onChangeText={(v) => update('image', v)}
-          autoCapitalize="none"
-        />
+        <ImagePickerField value={form.image} onChange={(uri) => update('image', uri)} />
 
         <Text style={styles.sectionLabel}>Contact</Text>
         <Input label="Owner Name" value={form.ownerName} onChangeText={(v) => update('ownerName', v)} error={errors.ownerName} />
@@ -222,7 +216,7 @@ export default function PropertyFormScreen({ route, navigation }: AddProps | Edi
         />
 
         <Button
-          label={isEdit ? 'Save Changes' : 'Post Property'}
+          label={isEdit ? 'Save Changes' : 'Continue to Payment'}
           onPress={handleSubmit}
           loading={isSubmitting}
           style={styles.submitButton}

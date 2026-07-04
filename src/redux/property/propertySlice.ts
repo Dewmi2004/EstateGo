@@ -46,16 +46,17 @@ export const fetchPropertyById = createAsyncThunk<Property, string, { rejectValu
   }
 );
 
-export const createProperty = createAsyncThunk<Property, PropertyFormInput, { rejectValue: string }>(
-  'property/create',
-  async (input, { rejectWithValue }) => {
-    try {
-      return await propertyApi.create(input);
-    } catch (err) {
-      return rejectWithValue((err as Error).message);
-    }
+export const createProperty = createAsyncThunk<
+  Property,
+  { input: PropertyFormInput; paymentOrderId: string },
+  { rejectValue: string }
+>('property/create', async ({ input, paymentOrderId }, { rejectWithValue }) => {
+  try {
+    return await propertyApi.create(input, paymentOrderId);
+  } catch (err) {
+    return rejectWithValue((err as Error).message);
   }
-);
+});
 
 export const updateProperty = createAsyncThunk<
   Property,

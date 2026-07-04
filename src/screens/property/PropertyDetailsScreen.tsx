@@ -14,12 +14,9 @@ import Button from '@/components/Button/Button';
 import { colors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
+import { formatMonthlyRent } from '@/utils/currency';
 
 type Props = NativeStackScreenProps<PropertyStackParamList, 'PropertyDetails'>;
-
-function formatPrice(price: number): string {
-  return `৳ ${price.toLocaleString()}/mo`;
-}
 
 export default function PropertyDetailsScreen({ route, navigation }: Props) {
   const { propertyId } = route.params;
@@ -123,7 +120,7 @@ export default function PropertyDetailsScreen({ route, navigation }: Props) {
             </Text>
           </View>
 
-          <Text style={styles.price}>{formatPrice(property.price)}</Text>
+          <Text style={styles.price}>{formatMonthlyRent(property.price)}</Text>
 
           <View style={styles.specsRow}>
             <View style={styles.specItem}>

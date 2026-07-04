@@ -5,6 +5,7 @@ import authReducer from './auth/authSlice';
 import propertyReducer from './property/propertySlice';
 import favoriteReducer from './favorite/favoriteSlice';
 import chatbotReducer from './chatbot/chatbotSlice';
+import paymentReducer from './payment/paymentSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     property: propertyReducer,
     favorite: favoriteReducer,
     chatbot: chatbotReducer,
+    payment: paymentReducer,
   },
 });
 

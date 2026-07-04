@@ -7,6 +7,7 @@ import { colors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { Property } from '@/types/property.types';
+import { formatMonthlyRent } from '@/utils/currency';
 
 interface PropertyCardProps {
   property: Property;
@@ -14,10 +15,6 @@ interface PropertyCardProps {
   onToggleFavorite?: () => void;
   isFavorite?: boolean;
   width?: number | '100%';
-}
-
-function formatPrice(price: number): string {
-  return `৳ ${price.toLocaleString()}/mo`;
 }
 
 export default function PropertyCard({
@@ -58,7 +55,7 @@ export default function PropertyCard({
         </TouchableOpacity>
 
         <View style={styles.priceTag}>
-          <Text style={styles.priceText}>{formatPrice(property.price)}</Text>
+          <Text style={styles.priceText}>{formatMonthlyRent(property.price)}</Text>
         </View>
       </View>
 

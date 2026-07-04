@@ -7,6 +7,7 @@
 
 import { Property, PropertyFilters, PropertyFormInput } from '@/types/property.types';
 import { featuredProperties } from '@/data/mockProperties';
+import { paymentStore } from './paymentStore';
 
 let properties: Property[] = [...featuredProperties];
 let nextId = properties.length + 1;
@@ -49,10 +50,13 @@ export const propertyStore = {
     return property;
   },
 
-  create(input: PropertyFormInput, ownerId: string | null): Property {
+  create(input: PropertyFormInput, ownerId: string | null, paymentOrderId: string | null): Property {
     if (!ownerId) throw new PropertyError('You must be logged in to list a property', 401);
     if (!input.title || !input.price || !input.city) {
       throw new PropertyError('Title, price and city are required', 400);
+    }
+    if (!paymentOrderId || !paymentStore.isPaid(paymentOrderId, ownerId)) {
+      throw new PropertyError('A confirmed payment is required before posting a listing', 402);
     }
 
     const now = new Date().toISOString();

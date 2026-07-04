@@ -16,7 +16,7 @@ import { ChatMessage } from '@/types/chat.types';
 
 const SUGGESTIONS = [
   'Recommend a 2-bedroom flat',
-  'My budget is ৳20,000/mo',
+  'My budget is LKR 20,000/mo',
   'What is a mortgage?',
   'Tips for a first-time buyer',
 ];

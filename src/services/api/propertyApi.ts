@@ -14,8 +14,8 @@ export const propertyApi = {
     return data;
   },
 
-  create: async (input: PropertyFormInput): Promise<Property> => {
-    const { data } = await axiosInstance.post<Property>('/properties', input);
+  create: async (input: PropertyFormInput, paymentOrderId: string): Promise<Property> => {
+    const { data } = await axiosInstance.post<Property>('/properties', { ...input, paymentOrderId });
     return data;
   },
 

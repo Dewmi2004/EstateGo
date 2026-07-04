@@ -124,7 +124,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <CTABanner
             title="Have a property to list?"
-            description="Reach thousands of verified renters and buyers across Bangladesh in minutes."
+            description="Reach thousands of verified renters and buyers across Sri Lanka for a one-time LKR 10,000 listing fee."
             buttonLabel="Post Your Property"
             onPress={goToAddProperty}
           />

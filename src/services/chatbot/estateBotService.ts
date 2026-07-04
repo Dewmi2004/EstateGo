@@ -8,6 +8,7 @@
 // ChatbotScreen and chatbotSlice don't need to change.
 
 import { Property } from '@/types/property.types';
+import { formatCurrency, formatMonthlyRent } from '@/utils/currency';
 
 const FAQ: { pattern: RegExp; answer: string }[] = [
   {
@@ -33,7 +34,7 @@ const FAQ: { pattern: RegExp; answer: string }[] = [
 ];
 
 function extractBudget(message: string): number | null {
-  const match = message.match(/(?:rs\.?|৳|tk\.?)\s*([\d,.]+)\s*(million|lakh|lac|m)?/i);
+  const match = message.match(/(?:rs\.?|lkr)\s*([\d,.]+)\s*(million|lakh|lac|m)?/i);
   if (!match) return null;
   const raw = parseFloat(match[1].replace(/,/g, ''));
   if (isNaN(raw)) return null;
@@ -48,12 +49,8 @@ function extractBedrooms(message: string): number | null {
   return match ? Number(match[1]) : null;
 }
 
-function formatPrice(price: number): string {
-  return `৳${price.toLocaleString()}/mo`;
-}
-
 function describeProperty(p: Property): string {
-  return `${p.title} in ${p.location}, ${p.city} — ${p.bedrooms} bed / ${p.bathrooms} bath, ${formatPrice(p.price)}`;
+  return `${p.title} in ${p.location}, ${p.city} — ${p.bedrooms} bed / ${p.bathrooms} bath, ${formatMonthlyRent(p.price)}`;
 }
 
 interface BotContext {
@@ -76,7 +73,7 @@ export function getBotResponse(message: string, context: BotContext): string {
       const [a, b] = named;
       return (
         `Comparing ${a.title} and ${b.title}:\n\n` +
-        `• Price: ${formatPrice(a.price)} vs ${formatPrice(b.price)}\n` +
+        `• Price: ${formatMonthlyRent(a.price)} vs ${formatMonthlyRent(b.price)}\n` +
         `• Size: ${a.area} sqft vs ${b.area} sqft\n` +
         `• Bedrooms: ${a.bedrooms} vs ${b.bedrooms}\n` +
         `• Location: ${a.location} vs ${b.location}\n\n` +
@@ -99,7 +96,7 @@ export function getBotResponse(message: string, context: BotContext): string {
     }
     return (
       `For investment, look at price-per-square-foot rather than just the sticker price. Right now, the best value listings are:\n\n` +
-      ranked.map((p) => `• ${describeProperty(p)} (৳${Math.round(p.price / p.area)}/sqft)`).join('\n') +
+      ranked.map((p) => `• ${describeProperty(p)} (${formatCurrency(Math.round(p.price / p.area))}/sqft)`).join('\n') +
       `\n\nVerified listings in growing areas tend to hold value better long-term.`
     );
   }
@@ -122,10 +119,10 @@ export function getBotResponse(message: string, context: BotContext): string {
   if (budget && /budget/i.test(lower)) {
     const affordable = context.properties.filter((p) => p.price * 12 * 15 <= budget).slice(0, 3);
     if (affordable.length === 0) {
-      return `With a budget around ৳${budget.toLocaleString()}, most current listings are outside that range — try widening your search or looking at Room/Flat categories.`;
+      return `With a budget around ${formatCurrency(budget)}, most current listings are outside that range — try widening your search or looking at Room/Flat categories.`;
     }
     return (
-      `With a budget around ৳${budget.toLocaleString()}, these listings fit comfortably:\n\n` +
+      `With a budget around ${formatCurrency(budget)}, these listings fit comfortably:\n\n` +
       affordable.map((p) => `• ${describeProperty(p)}`).join('\n')
     );
   }
