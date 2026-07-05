@@ -1,6 +1,6 @@
 // src/services/msw/favoriteStore.ts
 // In-memory favorites CRUD, keyed by userId -> Set of property ids.
-// Shared by handlers.ts (native) and webMockAdapter.ts (web).
+// Used by mockAdapter.ts, the single adapter shared across every platform.
 
 const favoritesByUser = new Map<string, Set<string>>();
 

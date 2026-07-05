@@ -1,10 +1,14 @@
 # Dependencies
 node_modules/
+server/node_modules/
 
 # Expo
 .expo/
 dist/
 web-build/
+
+# Secrets — never commit real PayHere credentials
+server/.env
 
 # Native
 *.orig.*

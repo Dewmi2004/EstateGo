@@ -1,7 +1,6 @@
 // src/services/msw/propertyStore.ts
 // In-memory Property CRUD logic, shared by both mock transports:
-// - handlers.ts (msw/native, used on Android/iOS)
-// - webMockAdapter.ts (used on web)
+// Used by mockAdapter.ts, the single adapter shared across every platform.
 // Keeping the actual list/create/update/delete logic here means both
 // transports behave identically and there's only one place to fix bugs.
 

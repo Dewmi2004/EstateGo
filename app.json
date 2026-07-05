@@ -19,15 +19,6 @@
     },
     "web": {
       "bundler": "metro"
-    },
-    "plugins": [
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "EstateGo needs access to your photos so you can add images to your property listing.",
-          "cameraPermission": "EstateGo needs access to your camera so you can take photos of your property."
-        }
-      ]
-    ]
+    }
   }
 }

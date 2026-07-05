@@ -1,6 +1,6 @@
 // src/services/msw/paymentStore.ts
-// In-memory PayHere order lifecycle, shared by handlers.ts (native) and
-// webMockAdapter.ts (web) — same pattern as propertyStore/favoriteStore.
+// In-memory PayHere order lifecycle, used by
+// mockAdapter.ts — same pattern as propertyStore/favoriteStore.
 
 import { PaymentOrder, LISTING_FEE_LKR } from '@/types/payment.types';
 

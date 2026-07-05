@@ -3,7 +3,7 @@
 // hash generated server-side from your merchant secret (merchant_id +
 // order_id + amount + currency, MD5-hashed) — that secret can never live in
 // a mobile app bundle, or anyone could forge payments. Since this project
-// has no backend yet (MSW/webMockAdapter stand in for one), this models the
+// has no backend yet (mockAdapter.ts stands in for one), this models the
 // full PayHere order lifecycle so the checkout flow, UI, and CRUD gating are
 // all correct now — swapping the mock confirm step for a real PayHere
 // notify-webhook call later is a backend task, not a front-end rewrite.

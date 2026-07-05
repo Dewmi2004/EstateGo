@@ -1,10 +1,5 @@
 // App.tsx
 
-if (__DEV__) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('@/services/msw/mockServer').startMockServer();
-}
-
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, Platform, Dimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
