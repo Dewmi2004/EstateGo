@@ -1,0 +1,19 @@
+# server/render.yaml
+# Render "Blueprint" — lets Render auto-configure this service when you
+# connect your repo, instead of clicking through the dashboard manually.
+# Optional: you can also just set these up by hand in the Render dashboard.
+
+services:
+  - type: web
+    name: estategoNumbergo-payhere-server
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PAYHERE_MERCHANT_ID
+        sync: false
+      - key: PAYHERE_MERCHANT_SECRET
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
