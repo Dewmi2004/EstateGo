@@ -9,7 +9,6 @@ import { generateMockToken } from './mockJwt';
 import { getUserIdFromAuthHeader } from './authFromRequest';
 import { propertyStore, PropertyError } from './propertyStore';
 import { favoriteStore } from './favoriteStore';
-import { paymentStore, PaymentError } from './paymentStore';
 import { LoginPayload, RegisterPayload, AuthResponse } from '@/types/auth.types';
 import { PropertyFilters, PropertyFormInput } from '@/types/property.types';
 
@@ -100,10 +99,9 @@ export const handlers = [
   http.post('*/properties', async ({ request }) => {
     await delay(API_DELAY_MS);
     const userId = getUserIdFromAuthHeader(request.headers.get('authorization'));
-    const body = (await request.json()) as PropertyFormInput & { paymentOrderId?: string };
-    const { paymentOrderId, ...propertyInput } = body;
+    const body = (await request.json()) as PropertyFormInput;
     try {
-      const created = propertyStore.create(propertyInput, userId, paymentOrderId ?? null);
+      const created = propertyStore.create(body, userId);
       return HttpResponse.json(created, { status: 201 });
     } catch (err) {
       const e = err as PropertyError;
@@ -159,43 +157,6 @@ export const handlers = [
     if (!userId) return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
     favoriteStore.remove(userId, String(params.id));
     return HttpResponse.json({ message: 'Removed from favorites' }, { status: 200 });
-  }),
-
-  // ---------- Payments (PayHere-style mock checkout) ----------
-  http.post('*/payments/checkout', async ({ request }) => {
-    await delay(400);
-    const userId = getUserIdFromAuthHeader(request.headers.get('authorization'));
-    if (!userId) return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    const order = paymentStore.createOrder(userId);
-    return HttpResponse.json(order, { status: 201 });
-  }),
-
-  http.get('*/payments/:orderId', async ({ request, params }) => {
-    await delay(200);
-    const userId = getUserIdFromAuthHeader(request.headers.get('authorization'));
-    try {
-      const order = paymentStore.getOrder(String(params.orderId));
-      if (order.userId !== userId) return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-      return HttpResponse.json(order, { status: 200 });
-    } catch (err) {
-      const e = err as PaymentError;
-      return HttpResponse.json({ message: e.message }, { status: e.status ?? 500 });
-    }
-  }),
-
-  // Stands in for PayHere redirecting back + firing its server-to-server
-  // notify webhook once the sandbox/live checkout actually completes.
-  http.post('*/payments/:orderId/confirm', async ({ request, params }) => {
-    await delay(1200); // simulate the gateway processing time
-    const userId = getUserIdFromAuthHeader(request.headers.get('authorization'));
-    if (!userId) return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    try {
-      const order = paymentStore.markPaid(String(params.orderId), userId);
-      return HttpResponse.json(order, { status: 200 });
-    } catch (err) {
-      const e = err as PaymentError;
-      return HttpResponse.json({ message: e.message }, { status: e.status ?? 500 });
-    }
   }),
 
   // ---------- Profile ----------

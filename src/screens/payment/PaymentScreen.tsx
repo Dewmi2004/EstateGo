@@ -2,19 +2,20 @@
 //
 // Two payment paths, chosen automatically via isPayHereConfigured():
 //
-// - Not configured (default, out of the box): simulates the payment
-//   entirely in-app. No server, no ngrok, nothing to set up — this is what
-//   runs until you deliberately configure src/config/env.ts.
+// - Not configured (default, out of the box): shows a card-entry screen
+//   styled like a real gateway checkout, then simulates processing and
+//   always succeeds — no server, no ngrok, nothing to set up. This is what
+//   runs unless you deliberately configure src/config/env.ts.
 // - Configured: loads PayHere's real sandbox checkout in a WebView, backed
-//   by the server in server/ (see server/README.md). Requires that server
-//   running and exposed via ngrok.
+//   by the server in server/ (see server/README.md).
 //
-// Either way, propertyStore.create's payment gate behaves identically —
-// both paths end by dispatching confirmPayment() against the app's own
-// mock paymentSlice before creating the property.
+// Either way, both paths end by dispatching confirmPayment() against the
+// app's own mock paymentSlice before creating the property, so
+// propertyStore.create's payment gate behaves identically regardless of
+// which path ran.
 
 import React, { useState, useRef, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Icon, ActivityIndicator } from 'react-native-paper';
 import { WebView, WebViewNavigation } from 'react-native-webview';
@@ -26,6 +27,7 @@ import { createProperty } from '@/redux/property/propertySlice';
 import { payhereApi } from '@/services/api/payhereApi';
 import { isPayHereConfigured } from '@/config/env';
 import Button from '@/components/Button/Button';
+import Input from '@/components/Input/Input';
 import { colors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
@@ -34,21 +36,55 @@ import { LISTING_FEE_LKR } from '@/types/payment.types';
 
 type Props = NativeStackScreenProps<PropertyStackParamList, 'Payment'>;
 
-type Stage = 'summary' | 'launching' | 'checkout' | 'processing' | 'confirming' | 'success' | 'error';
+type Stage =
+  | 'summary'
+  | 'cardEntry'
+  | 'launching'
+  | 'checkout'
+  | 'processing'
+  | 'confirming'
+  | 'success'
+  | 'error';
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 20; // ~40 seconds
+
+// --- tiny formatters for the mock card form, purely cosmetic ---
+function formatCardNumber(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 16);
+  return digits.replace(/(.{4})/g, '$1 ').trim();
+}
+function formatExpiry(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+}
+function formatCvv(value: string): string {
+  return value.replace(/\D/g, '').slice(0, 3);
+}
+
+interface CardFormErrors {
+  cardNumber?: string;
+  expiry?: string;
+  cvv?: string;
+  cardholderName?: string;
+}
 
 export default function PaymentScreen({ route, navigation }: Props) {
   const { formInput } = route.params;
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { error: paymentSliceError } = useAppSelector((state) => state.payment);
   const [stage, setStage] = useState<Stage>('summary');
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const orderIdRef = useRef<string | null>(null);
   const hasHandledRedirect = useRef(false);
+
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [cardholderName, setCardholderName] = useState(user?.name ?? '');
+  const [cardErrors, setCardErrors] = useState<CardFormErrors>({});
 
   const finishWithProperty = async (orderId: string) => {
     const createResult = await dispatch(createProperty({ input: formInput, paymentOrderId: orderId }));
@@ -59,8 +95,19 @@ export default function PaymentScreen({ route, navigation }: Props) {
     }
   };
 
-  // ---- Path A: no PayHere server configured — simulate in-app ----
+  // ---- Path A: no PayHere server configured — card-entry mock, always succeeds ----
+  const validateCardForm = (): boolean => {
+    const errors: CardFormErrors = {};
+    if (cardNumber.replace(/\s/g, '').length < 12) errors.cardNumber = 'Enter a card number';
+    if (expiry.length < 5) errors.expiry = 'Enter expiry as MM/YY';
+    if (cvv.length < 3) errors.cvv = 'Enter the 3-digit CVV';
+    if (!cardholderName.trim()) errors.cardholderName = "Enter the cardholder's name";
+    setCardErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const runSimulatedPayment = async () => {
+    if (!validateCardForm()) return;
     setStage('processing');
     try {
       const mockOrderResult = await dispatch(startCheckout());
@@ -69,9 +116,13 @@ export default function PaymentScreen({ route, navigation }: Props) {
       }
       const orderId = mockOrderResult.payload.orderId;
 
+      // Sandbox-style processing delay so it feels like a real gateway
+      // round-trip rather than an instant local flip.
+      await new Promise((resolve) => setTimeout(resolve, 1600));
+
       const confirmResult = await dispatch(confirmPayment(orderId));
-      if (!confirmPayment.fulfilled.match(confirmResult)) {
-        throw new Error(paymentSliceError ?? 'Payment could not be confirmed');
+      if (confirmPayment.rejected.match(confirmResult)) {
+        throw new Error(confirmResult.payload ?? 'Payment could not be confirmed');
       }
 
       await finishWithProperty(orderId);
@@ -140,12 +191,12 @@ export default function PaymentScreen({ route, navigation }: Props) {
     }
   };
 
-  const handlePay = () => {
+  const handleContinueFromSummary = () => {
     setErrorMessage(null);
     if (isPayHereConfigured()) {
       runRealPayHereCheckout();
     } else {
-      runSimulatedPayment();
+      setStage('cardEntry');
     }
   };
 
@@ -221,12 +272,71 @@ export default function PaymentScreen({ route, navigation }: Props) {
                 </View>
               </View>
 
-              <Button label={`Pay ${formatCurrency(LISTING_FEE_LKR)} with PayHere`} onPress={handlePay} />
+              <Button
+                label={`Pay ${formatCurrency(LISTING_FEE_LKR)} with PayHere`}
+                onPress={handleContinueFromSummary}
+              />
               <Text style={styles.disclaimer}>
                 {isPayHereConfigured()
-                  ? "You'll be taken to PayHere's real sandbox checkout. Use test card 4916217501611292, any future expiry, any CVV."
-                  : 'Simulated checkout — no real payment gateway is contacted in this build.'}
+                  ? "You'll be taken to PayHere's real sandbox checkout."
+                  : 'Sandbox checkout — enter any card details to continue.'}
               </Text>
+            </>
+          )}
+
+          {stage === 'cardEntry' && (
+            <>
+              <View style={styles.cardFormHeader}>
+                <Icon source="shield-check-outline" size={16} color={colors.success} />
+                <Text style={styles.cardFormHeaderText}>Secure sandbox checkout</Text>
+              </View>
+
+              <View style={styles.amountPill}>
+                <Text style={styles.amountPillLabel}>Amount to pay</Text>
+                <Text style={styles.amountPillValue}>{formatCurrency(LISTING_FEE_LKR)}</Text>
+              </View>
+
+              <Input
+                label="Card Number"
+                value={cardNumber}
+                onChangeText={(v) => setCardNumber(formatCardNumber(v))}
+                keyboardType="numeric"
+                icon="credit-card-outline"
+                error={cardErrors.cardNumber}
+              />
+              <View style={styles.row}>
+                <View style={styles.rowItem}>
+                  <Input
+                    label="Expiry (MM/YY)"
+                    value={expiry}
+                    onChangeText={(v) => setExpiry(formatExpiry(v))}
+                    keyboardType="numeric"
+                    error={cardErrors.expiry}
+                  />
+                </View>
+                <View style={styles.rowItem}>
+                  <Input
+                    label="CVV"
+                    value={cvv}
+                    onChangeText={(v) => setCvv(formatCvv(v))}
+                    keyboardType="numeric"
+                    secureTextEntry
+                    error={cardErrors.cvv}
+                  />
+                </View>
+              </View>
+              <Input
+                label="Cardholder Name"
+                value={cardholderName}
+                onChangeText={setCardholderName}
+                autoCapitalize="words"
+                error={cardErrors.cardholderName}
+              />
+
+              <Button label={`Pay ${formatCurrency(LISTING_FEE_LKR)}`} onPress={runSimulatedPayment} style={styles.payButton} />
+              <TouchableOpacity onPress={() => setStage('summary')}>
+                <Text style={styles.backLink}>Back</Text>
+              </TouchableOpacity>
             </>
           )}
 
@@ -415,5 +525,55 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  // card entry stage
+  cardFormHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 16,
+  },
+  cardFormHeaderText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: moderateScale(type.micro),
+    color: colors.success,
+  },
+  amountPill: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    padding: moderateScale(14),
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  amountPillLabel: {
+    fontFamily: fonts.body,
+    fontSize: moderateScale(type.micro),
+    color: colors.textMuted,
+    marginBottom: 4,
+  },
+  amountPillValue: {
+    fontFamily: fonts.displayBold,
+    fontSize: moderateScale(type.h2),
+    color: colors.primary,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  rowItem: {
+    flex: 1,
+  },
+  payButton: {
+    marginTop: 8,
+  },
+  backLink: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: moderateScale(type.caption),
+    color: colors.primary,
+    textAlign: 'center',
+    marginTop: 4,
   },
 });

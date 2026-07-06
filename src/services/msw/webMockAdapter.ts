@@ -11,7 +11,6 @@ import { generateMockToken } from './mockJwt';
 import { getUserIdFromAuthHeader } from './authFromRequest';
 import { propertyStore, PropertyError } from './propertyStore';
 import { favoriteStore } from './favoriteStore';
-import { paymentStore, PaymentError } from './paymentStore';
 import { LoginPayload, RegisterPayload, AuthResponse } from '@/types/auth.types';
 import { PropertyFilters, PropertyFormInput } from '@/types/property.types';
 
@@ -130,36 +129,6 @@ export const webMockAdapter: AxiosAdapter = async (config) => {
     return ok({ message: 'Removed from favorites' }, 200, config);
   }
 
-  // ---------- Payments (PayHere-style mock checkout) ----------
-  if (url.endsWith('/payments/checkout') && method === 'post') {
-    if (!userId) throw fail('Unauthorized', 401, config);
-    return ok(paymentStore.createOrder(userId), 201, config);
-  }
-
-  const paymentConfirmMatch = url.match(/\/payments\/([^/]+)\/confirm$/);
-  if (paymentConfirmMatch && method === 'post') {
-    await wait(800); // simulate gateway processing time
-    if (!userId) throw fail('Unauthorized', 401, config);
-    try {
-      return ok(paymentStore.markPaid(paymentConfirmMatch[1], userId), 200, config);
-    } catch (err) {
-      const e = err as PaymentError;
-      throw fail(e.message, e.status ?? 500, config);
-    }
-  }
-
-  const paymentGetMatch = url.match(/\/payments\/([^/]+)$/);
-  if (paymentGetMatch && method === 'get') {
-    try {
-      const order = paymentStore.getOrder(paymentGetMatch[1]);
-      if (order.userId !== userId) throw fail('Unauthorized', 401, config);
-      return ok(order, 200, config);
-    } catch (err) {
-      const e = err as PaymentError;
-      throw fail(e.message, e.status ?? 500, config);
-    }
-  }
-
   // ---------- Properties ----------
   const propertyIdMatch = url.match(/\/properties\/([^/]+)$/);
 
@@ -190,9 +159,8 @@ export const webMockAdapter: AxiosAdapter = async (config) => {
         return ok(propertyStore.list(filters, userId), 200, config);
       }
       if (method === 'post') {
-        const body = parseBody(config) as PropertyFormInput & { paymentOrderId?: string };
-        const { paymentOrderId, ...propertyInput } = body;
-        return ok(propertyStore.create(propertyInput, userId, paymentOrderId ?? null), 201, config);
+        const body = parseBody(config) as PropertyFormInput;
+        return ok(propertyStore.create(body, userId), 201, config);
       }
     } catch (err) {
       const e = err as PropertyError;

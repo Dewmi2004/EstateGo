@@ -14,7 +14,7 @@ the RN app's own mock layer. This server exists purely for PayHere.
 1. Go to https://sandbox.payhere.lk and create a sandbox merchant account (free).
 2. Log in → **Integrations** (left sidebar) → note your **Merchant ID**.
 3. Same page → generate/copy your **Merchant Secret**.
-4. Under **Domains/Apps**, add your ngrok domain once you have it (step 3 below) — PayHere sandbox requires the domain calling it to be allow-listed.
+4. Under **Domains/Apps**, add your server's public domain once you have one (see step 3 below — either your Render `.onrender.com` domain, or your ngrok domain) — PayHere sandbox requires the calling domain to be allow-listed.
 
 ## 2. Configure and run the server
 
@@ -41,7 +41,36 @@ You should see:
 PayHere server running on http://localhost:4000
 ```
 
-## 3. Expose it with ngrok
+## 3. Expose it publicly — two options
+
+**Option A — Render (recommended: works on any network, no PC needed, permanent URL)**
+
+ngrok requires your PC to stay on and your phone to be reachable through that
+session — annoying for regular testing, and it doesn't work at all if your
+phone is on mobile data or a different network than your PC. Deploying this
+server to a free host fixes both problems: real internet, permanent HTTPS
+URL, works from anywhere.
+
+1. Push this project to a GitHub repo (if it isn't already).
+2. Go to https://render.com → sign up (free) → **New +** → **Web Service**.
+3. Connect your GitHub repo.
+4. Render should detect `server/render.yaml` automatically. If not, set manually:
+   - **Root Directory:** `server`
+   - **Build Command:** `npm install`
+   - **Start Command:** `npm start`
+5. Under **Environment**, add:
+   ```
+   PAYHERE_MERCHANT_ID=your_sandbox_merchant_id
+   PAYHERE_MERCHANT_SECRET=your_sandbox_merchant_secret
+   PUBLIC_BASE_URL=https://your-service-name.onrender.com
+   ```
+   (You'll only know the exact `.onrender.com` URL after the first deploy — deploy once, copy the URL Render gives you, paste it into `PUBLIC_BASE_URL`, then it auto-redeploys.)
+6. Add that `.onrender.com` domain to PayHere sandbox's allow-listed domains (Integrations → Domains/Apps).
+7. In the RN app, set `src/config/env.ts` → `PAYHERE_BACKEND_URL = 'https://your-service-name.onrender.com'`.
+
+That's it — no ngrok, no PC needing to stay on, works from any network your phone is on. The only downside: Render's **free tier sleeps after 15 minutes of no traffic** and takes ~30-50 seconds to wake up on the next request — the first payment attempt after a while idle may feel slow, but it will work. (Paid tiers, or alternatives like Railway/Fly.io, avoid the sleep entirely if that matters for a live demo.)
+
+**Option B — ngrok (quicker for one-off local testing, but session-based)**
 
 In a **second terminal**:
 ```bash
@@ -62,7 +91,10 @@ time that happens, repeat steps 3b and 4 below.
 
 **3c.** Add the ngrok domain (just the host, e.g. `a1b2-c3d4.ngrok-free.app`) to your PayHere sandbox account's allow-listed domains (Integrations → Domains/Apps).
 
-## 4. Point the mobile app at your server
+## 4. Point the mobile app at your server (if using Option B / ngrok)
+
+If you deployed to Render (Option A), you already did this in step 7 above —
+skip this section.
 
 In the RN app, open `src/config/env.ts` and set:
 ```ts
@@ -75,7 +107,7 @@ export const PAYHERE_BACKEND_URL = 'https://a1b2-c3d4.ngrok-free.app';
 1. In the app: Home → Post Your Property → fill the form → Continue to Payment.
 2. The Payment screen loads PayHere's real sandbox checkout inside a WebView.
 3. Use PayHere's sandbox test card: **Card Number `4916217501611292`, any future expiry, any CVV.**
-4. Complete payment. PayHere calls your `/api/payhere/notify` webhook (through ngrok) to confirm it server-to-server. Watch your server terminal — you'll see `[PayHere notify] Order ... confirmed PAID.`
+4. Complete payment. PayHere calls your `/api/payhere/notify` webhook (through your Render URL or ngrok tunnel) to confirm it server-to-server. Watch your server logs — you'll see `[PayHere notify] Order ... confirmed PAID.`
 5. The app polls your server, sees the order is paid, and creates the listing.
 
 ## Why this can't just live in the app
