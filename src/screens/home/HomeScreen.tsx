@@ -3,12 +3,13 @@
 // (now real CRUD data via propertySlice), why-EstateGo grid, list-your-
 // property CTA, how-it-works steps.
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Icon } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale, maxContentWidth } from '@/utils/responsive';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
@@ -23,6 +24,8 @@ import CTABanner from '@/components/CTABanner/CTABanner';
 import { categories, trustStats, whyChoose, howItWorks } from '@/data/mockProperties';
 
 export default function HomeScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   // Loosely typed: Home lives in the tab navigator and needs to reach into
   // the nested Properties stack, which makes the composite navigation type
   // unwieldy for a screen this simple — see FavoritesScreen for the same
@@ -153,7 +156,8 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,

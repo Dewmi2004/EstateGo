@@ -2,7 +2,7 @@
 // Read (single) + entry points for Update/Delete when the logged-in user
 // owns the listing.
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Image, Alert, TouchableOpacity, Linking } from 'react-native';
 import { Text, Icon, ActivityIndicator } from 'react-native-paper';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -11,7 +11,8 @@ import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchPropertyById, deleteProperty, clearSelected } from '@/redux/property/propertySlice';
 import { toggleFavorite } from '@/redux/favorite/favoriteSlice';
 import Button from '@/components/Button/Button';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { formatMonthlyRent } from '@/utils/currency';
@@ -19,6 +20,8 @@ import { formatMonthlyRent } from '@/utils/currency';
 type Props = NativeStackScreenProps<PropertyStackParamList, 'PropertyDetails'>;
 
 export default function PropertyDetailsScreen({ route, navigation }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { propertyId } = route.params;
   const dispatch = useAppDispatch();
   const { selected: property, isLoading, isDeleting } = useAppSelector((state) => state.property);
@@ -221,7 +224,8 @@ export default function PropertyDetailsScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,

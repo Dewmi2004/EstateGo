@@ -1,9 +1,10 @@
 // src/components/PropertyCard/PropertyCard.tsx
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Text, Icon } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { Property } from '@/types/property.types';
@@ -24,6 +25,8 @@ export default function PropertyCard({
   isFavorite = false,
   width,
 }: PropertyCardProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <TouchableOpacity
       style={[styles.card, width ? { width } : undefined]}
@@ -89,7 +92,8 @@ export default function PropertyCard({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   card: {
     width: moderateScale(240),
     backgroundColor: colors.surface,

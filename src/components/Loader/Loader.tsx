@@ -1,9 +1,10 @@
 // src/components/Loader/Loader.tsx
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, Modal } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 
 interface LoaderProps {
   visible: boolean;
@@ -11,6 +12,8 @@ interface LoaderProps {
 }
 
 export default function Loader({ visible, label = 'Please wait...' }: LoaderProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   if (!visible) return null;
 
   return (
@@ -25,7 +28,8 @@ export default function Loader({ visible, label = 'Please wait...' }: LoaderProp
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: colors.overlay,

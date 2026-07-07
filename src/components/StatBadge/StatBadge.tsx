@@ -3,10 +3,11 @@
 // this overlap is the app's signature motif, echoed by the price tag overlap
 // on PropertyCard.
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 
@@ -21,6 +22,8 @@ interface StatBadgeProps {
 }
 
 export default function StatBadge({ stats }: StatBadgeProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.container}>
       {stats.map((stat, index) => (
@@ -36,7 +39,8 @@ export default function StatBadge({ stats }: StatBadgeProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: colors.surface,

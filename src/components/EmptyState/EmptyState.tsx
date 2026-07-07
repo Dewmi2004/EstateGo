@@ -1,9 +1,10 @@
 // src/components/EmptyState/EmptyState.tsx
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Icon } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 
@@ -14,6 +15,8 @@ interface EmptyStateProps {
 }
 
 export default function EmptyState({ icon, title, description }: EmptyStateProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.container}>
       <View style={styles.iconCircle}>
@@ -25,7 +28,8 @@ export default function EmptyState({ icon, title, description }: EmptyStateProps
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   container: {
     alignItems: 'center',
     paddingVertical: moderateScale(48),

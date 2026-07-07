@@ -2,10 +2,11 @@
 // Generic single-select chip row. Used for property type, status, and
 // bedroom-count pickers in the Add/Edit Property form and list filters.
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 
@@ -22,6 +23,8 @@ interface ChipSelectorProps<T extends string> {
 }
 
 export default function ChipSelector<T extends string>({ label, options, value, onChange }: ChipSelectorProps<T>) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.wrapper}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
@@ -44,7 +47,8 @@ export default function ChipSelector<T extends string>({ label, options, value, 
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   wrapper: {
     marginBottom: 4,
   },

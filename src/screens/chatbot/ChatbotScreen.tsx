@@ -2,14 +2,15 @@
 // EstateBot chat UI. Answers are generated locally by estateBotService.ts —
 // see that file for how to swap in a real OpenAI/Gemini call later.
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { View, StyleSheet, FlatList, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Icon, ActivityIndicator } from 'react-native-paper';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { addUserMessage, sendMessage } from '@/redux/chatbot/chatbotSlice';
 import Input from '@/components/Input/Input';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { ChatMessage } from '@/types/chat.types';
@@ -22,6 +23,8 @@ const SUGGESTIONS = [
 ];
 
 export default function ChatbotScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const dispatch = useAppDispatch();
   const { messages, isThinking } = useAppSelector((state) => state.chatbot);
   const { items: properties } = useAppSelector((state) => state.property);
@@ -105,7 +108,8 @@ export default function ChatbotScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,

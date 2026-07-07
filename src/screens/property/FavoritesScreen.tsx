@@ -3,7 +3,7 @@
 // favoriteSlice, filtering from whatever's already loaded in propertySlice
 // (fetching the full list first if it's empty).
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from 'react-native-paper';
@@ -13,11 +13,14 @@ import { fetchProperties } from '@/redux/property/propertySlice';
 import { fetchFavorites, toggleFavorite } from '@/redux/favorite/favoriteSlice';
 import PropertyCard from '@/components/PropertyCard/PropertyCard';
 import EmptyState from '@/components/EmptyState/EmptyState';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 
 export default function FavoritesScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   // Loosely typed on purpose: Favorites is a sibling tab to the Properties
   // stack, so navigating into PropertyDetails means reaching across tabs —
   // React Navigation's cross-tab composite types get unwieldy for a screen
@@ -68,7 +71,8 @@ export default function FavoritesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,

@@ -2,16 +2,19 @@
 // Runs bootstrapAuth once on mount. RootNavigator watches isBootstrapping/isAuthenticated
 // and switches stacks automatically once this resolves - no manual navigation needed here.
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { useAppDispatch } from '@/hooks/redux';
 import { bootstrapAuth } from '@/redux/auth/authSlice';
 
 export default function SplashScreen() {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -32,7 +35,8 @@ export default function SplashScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary,

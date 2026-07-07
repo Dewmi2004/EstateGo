@@ -6,6 +6,7 @@ import propertyReducer from './property/propertySlice';
 import favoriteReducer from './favorite/favoriteSlice';
 import chatbotReducer from './chatbot/chatbotSlice';
 import paymentReducer from './payment/paymentSlice';
+import settingsReducer from './settings/settingsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     favorite: favoriteReducer,
     chatbot: chatbotReducer,
     payment: paymentReducer,
+    settings: settingsReducer,
   },
 });
 

@@ -2,10 +2,11 @@
 // The floating search pill that sits inside the hero card. Not a full search
 // screen yet (that's Day 4) — tapping it is wired for navigation later.
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Icon } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 
@@ -15,6 +16,8 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ onPress, placeholder = 'Search by location, e.g. Gulshan' }: SearchBarProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <TouchableOpacity style={styles.container} activeOpacity={0.85} onPress={onPress}>
       <Icon source="magnify" size={20} color={colors.textMuted} />
@@ -28,7 +31,8 @@ export default function SearchBar({ onPress, placeholder = 'Search by location, 
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',

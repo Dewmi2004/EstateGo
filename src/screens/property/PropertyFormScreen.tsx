@@ -15,7 +15,8 @@ import ImagePickerField from '@/components/ImagePickerField/ImagePickerField';
 import Button from '@/components/Button/Button';
 import ChipSelector from '@/components/ChipSelector/ChipSelector';
 import Loader from '@/components/Loader/Loader';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { PropertyFormInput, PropertyType, PropertyStatus } from '@/types/property.types';
@@ -66,6 +67,8 @@ interface FormErrors {
 }
 
 export default function PropertyFormScreen({ route, navigation }: AddProps | EditProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const isEdit = route.name === 'EditProperty';
   const propertyId = isEdit ? (route.params as { propertyId: string }).propertyId : undefined;
 
@@ -228,7 +231,8 @@ export default function PropertyFormScreen({ route, navigation }: AddProps | Edi
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   flex: {
     flex: 1,
     backgroundColor: colors.background,

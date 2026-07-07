@@ -1,6 +1,6 @@
 // src/screens/auth/RegisterScreen.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -15,7 +15,8 @@ import { AuthStackParamList } from '@/navigation/AuthNavigator';
 import Input from '@/components/Input/Input';
 import Button from '@/components/Button/Button';
 import Loader from '@/components/Loader/Loader';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 import { moderateScale, maxContentWidth } from '@/utils/responsive';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
@@ -35,6 +36,8 @@ function validateEmail(email: string): boolean {
 }
 
 export default function RegisterScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const dispatch = useAppDispatch();
   const { isLoading, error } = useAppSelector((state) => state.auth);
   const { width } = useWindowDimensions();
@@ -144,7 +147,8 @@ export default function RegisterScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   flex: {
     flex: 1,
     backgroundColor: colors.background,

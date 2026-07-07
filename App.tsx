@@ -1,6 +1,6 @@
 // App.tsx
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, Platform, Dimensions } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Provider } from 'react-redux';
@@ -8,32 +8,45 @@ import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { store } from '@/redux/store';
-import { appTheme } from '@/theme/theme';
-import { colors } from '@/theme/colors';
+import { getAppTheme } from '@/theme/theme';
+import { useThemeColors, useIsDarkMode } from '@/theme/useThemeColors';
 import { useAppFonts } from '@/hooks/useAppFonts';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { hydrateSettings } from '@/redux/settings/settingsSlice';
+import { requestNotificationPermission } from '@/services/notifications/notificationService';
 import RootNavigator from '@/navigation/RootNavigator';
 
 function AppContent() {
+  const colors = useThemeColors();
+  const isDark = useIsDarkMode();
+  const dispatch = useAppDispatch();
+  const { isHydrated, notifications } = useAppSelector((state) => state.settings);
+
+  useEffect(() => {
+    dispatch(hydrateSettings());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isHydrated && notifications.enabled) {
+      requestNotificationPermission();
+    }
+  }, [isHydrated, notifications.enabled]);
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <Provider store={store}>
-          <PaperProvider theme={appTheme}>
-            <StatusBar style="light" />
-            <RootNavigator />
-          </PaperProvider>
-        </Provider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <PaperProvider theme={getAppTheme(colors)}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <RootNavigator />
+    </PaperProvider>
   );
 }
 
-export default function App() {
+function AppRoot() {
   const fontsLoaded = useAppFonts();
+  const colors = useThemeColors();
 
   if (!fontsLoaded) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: colors.primary }]}>
         <ActivityIndicator color={colors.accent} size="large" />
       </View>
     );
@@ -51,17 +64,28 @@ export default function App() {
 
   return (
     <View style={styles.webOuter}>
-      <View style={[styles.webFrame, { height: frameHeight }]}>
+      <View style={[styles.webFrame, { height: frameHeight, backgroundColor: colors.background }]}>
         <AppContent />
       </View>
     </View>
   );
 }
 
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <Provider store={store}>
+          <AppRoot />
+        </Provider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -77,7 +101,6 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     borderRadius: 40,
     overflow: 'hidden',
-    backgroundColor: colors.background,
     borderWidth: 10,
     borderColor: '#0B0D12',
     shadowColor: '#000',

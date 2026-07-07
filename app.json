@@ -19,6 +19,14 @@
     },
     "web": {
       "bundler": "metro"
-    }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#0B1F3A"
+        }
+      ]
+    ]
   }
 }

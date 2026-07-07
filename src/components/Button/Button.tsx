@@ -3,7 +3,7 @@
 import React from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { Button as PaperButton } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
 import { moderateScale } from '@/utils/responsive';
 
 interface AppButtonProps {
@@ -29,6 +29,7 @@ export default function Button({
   style,
   testID,
 }: AppButtonProps) {
+  const colors = useThemeColors();
   return (
     <PaperButton
       mode={mode}

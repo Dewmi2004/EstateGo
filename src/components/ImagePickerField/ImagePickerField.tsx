@@ -4,11 +4,12 @@
 // expo-image-picker (it falls back to the browser's file picker), which is
 // noted inline below rather than hidden.
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image, Alert, Platform } from 'react-native';
 import { Text, Icon } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 
@@ -26,6 +27,8 @@ const IMAGE_OPTIONS: ImagePicker.ImagePickerOptions = {
 };
 
 export default function ImagePickerField({ label = 'Property Photo', value, onChange }: ImagePickerFieldProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const pickFromGallery = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -85,7 +88,8 @@ export default function ImagePickerField({ label = 'Property Photo', value, onCh
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   wrapper: {
     marginBottom: 4,
   },

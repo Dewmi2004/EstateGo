@@ -14,7 +14,7 @@
 // propertyStore.create's payment gate behaves identically regardless of
 // which path ran.
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Icon, ActivityIndicator } from 'react-native-paper';
@@ -28,11 +28,14 @@ import { payhereApi } from '@/services/api/payhereApi';
 import { isPayHereConfigured } from '@/config/env';
 import Button from '@/components/Button/Button';
 import Input from '@/components/Input/Input';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { formatCurrency } from '@/utils/currency';
 import { LISTING_FEE_LKR } from '@/types/payment.types';
+import { useTranslation } from '@/i18n/i18n';
+import { sendLocalNotification } from '@/services/notifications/notificationService';
 
 type Props = NativeStackScreenProps<PropertyStackParamList, 'Payment'>;
 
@@ -71,9 +74,13 @@ interface CardFormErrors {
 }
 
 export default function PaymentScreen({ route, navigation }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { formInput } = route.params;
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { notifications: notificationSettings } = useAppSelector((state) => state.settings);
+  const { t } = useTranslation();
   const [stage, setStage] = useState<Stage>('summary');
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -90,6 +97,12 @@ export default function PaymentScreen({ route, navigation }: Props) {
     const createResult = await dispatch(createProperty({ input: formInput, paymentOrderId: orderId }));
     if (createProperty.fulfilled.match(createResult)) {
       setStage('success');
+      sendLocalNotification(
+        notificationSettings,
+        'paymentUpdates',
+        t('alerts.paymentSuccessTitle'),
+        t('alerts.paymentSuccessBody')
+      );
     } else {
       throw new Error('Payment succeeded but the listing could not be created');
     }
@@ -395,7 +408,8 @@ export default function PaymentScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,

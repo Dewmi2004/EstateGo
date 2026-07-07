@@ -2,7 +2,7 @@
 // Read (List) + Search/Filter from the CRUD set, plus the entry point into
 // Create (FAB -> AddProperty) and Update/Delete (via PropertyDetailsScreen).
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Icon } from 'react-native-paper';
@@ -15,7 +15,8 @@ import PropertyCard from '@/components/PropertyCard/PropertyCard';
 import ChipSelector from '@/components/ChipSelector/ChipSelector';
 import Input from '@/components/Input/Input';
 import EmptyState from '@/components/EmptyState/EmptyState';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { PropertyType } from '@/types/property.types';
@@ -33,6 +34,8 @@ const TYPE_OPTIONS: { label: string; value: PropertyType | 'All' }[] = [
 ];
 
 export default function PropertyListScreen({ navigation }: Props) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const dispatch = useAppDispatch();
   const { items, isLoading } = useAppSelector((state) => state.property);
   const { ids: favoriteIds } = useAppSelector((state) => state.favorite);
@@ -121,7 +124,8 @@ export default function PropertyListScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,

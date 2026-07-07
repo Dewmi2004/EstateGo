@@ -1,9 +1,10 @@
 // src/components/CategoryChip/CategoryChip.tsx
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Icon } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { fonts, type } from '@/theme/typography';
 import { moderateScale } from '@/utils/responsive';
 import { Category } from '@/types/property.types';
@@ -15,6 +16,8 @@ interface CategoryChipProps {
 }
 
 export default function CategoryChip({ category, active = false, onPress }: CategoryChipProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <TouchableOpacity style={styles.wrapper} activeOpacity={0.8} onPress={onPress}>
       <View style={[styles.iconCircle, active && styles.iconCircleActive]}>
@@ -28,7 +31,8 @@ export default function CategoryChip({ category, active = false, onPress }: Cate
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   wrapper: {
     alignItems: 'center',
     width: moderateScale(76),

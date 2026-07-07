@@ -1,9 +1,10 @@
 // src/components/Input/Input.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { TextInput, HelperText } from 'react-native-paper';
-import { colors } from '@/theme/colors';
+import { useThemeColors } from '@/theme/useThemeColors';
+import { AppColors } from '@/theme/colors';
 import { moderateScale } from '@/utils/responsive';
 
 interface AppInputProps {
@@ -33,6 +34,8 @@ export default function Input({
   numberOfLines,
   testID,
 }: AppInputProps) {
+  const colors = useThemeColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [hideText, setHideText] = useState(secureTextEntry);
 
   return (
@@ -69,7 +72,8 @@ export default function Input({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: AppColors) =>
+  StyleSheet.create({
   wrapper: {
     width: '100%',
   },
