@@ -167,7 +167,10 @@ npm run android   # Android
 npm run ios       # iOS
 npm run web       # Web
 ```
+## 📦 App Build
 
+Download the latest build here:
+https://expo.dev/accounts/imasha-dewmi/projects/estategoNumbergo/builds/4bfae693-4e92-4f7a-8426-ac2e332db914
 ### Optional: enable real PayHere payments
 By default this repo runs with **simulated payments only** (no real gateway is active — see the Payments section above). To use PayHere's real sandbox checkout, follow the setup guide in [`server/README.md`](./server/README.md), run the `/server` backend, and point the app at it via `src/config/env.ts`.
 
